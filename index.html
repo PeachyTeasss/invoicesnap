@@ -206,7 +206,8 @@
         <header class="header">
             <div class="logo">📄 InvoiceSnap</div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="downloadPDF()">💾 Download PDF</button>
+                <button class="btn btn-primary" onclick="buyNow()" id="buyBtn">💳 Get Pro - $9</button> 
+                <button class="btn btn-primary" onclick="downloadPDF()" id="downloadBtn" style="display: none;">💾 Download PDF</button>
                 <button class="btn btn-secondary" onclick="resetForm()">🔄 New Invoice</button>
             </div>
         </header>
@@ -361,6 +362,10 @@
                     <div class="notes-section">
                         <div class="notes-title">Notes:</div>
                         <div class="notes-content" id="previewNotes">Thank you for your business!</div>
+                        <div id="freeWatermark" style="margin-top: 20px; padding: 16px; background: #fef3c7; border: 2px dashed #f59e0b; border-radius: 8px; text-align: center; color: #92400e;">
+    <strong>🚀 Created with InvoiceSnap</strong><br>
+    <small>Remove watermark with Pro - <a href="#" onclick="buyNow()" style="color: #1d4ed8;">Upgrade $9</a></small>
+</div>
                     </div>
                 </div>
             </div>
@@ -516,7 +521,7 @@
     </script>
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        const stripe = Stripe('pk_test_51S3RE74Iu9msxaEGRGAU6jiQmqX4PmRLhzDo9brQfKXitYNFYyVatbS8STESORLqAAwUIGCnEr3xuK53d2vgliEP00s52lDs8F');
         
         function checkPurchaseStatus() {
             const urlParams = new URLSearchParams(window.location.search);
