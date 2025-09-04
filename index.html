@@ -29,6 +29,7 @@
         }
         
         .logo { font-size: 24px; font-weight: bold; color: #4f46e5; }
+        .pro-badge { background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
         
         .btn {
             padding: 10px 20px;
@@ -40,11 +41,14 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s;
         }
         
         .btn-primary { background: #4f46e5; color: white; }
         .btn-secondary { background: #6b7280; color: white; }
-        .btn:hover { opacity: 0.9; }
+        .btn-success { background: #10b981; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         
@@ -184,6 +188,37 @@
         .notes-title { font-weight: 600; color: #1f2937; margin-bottom: 8px; }
         .notes-content { color: #6b7280; white-space: pre-line; }
         
+        .watermark {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px dashed #f59e0b;
+            border-radius: 12px;
+            text-align: center;
+            color: #92400e;
+            animation: pulse 2s infinite;
+        }
+        
+        .watermark strong { font-size: 16px; display: block; margin-bottom: 8px; }
+        .watermark a { color: #1d4ed8; text-decoration: none; font-weight: 600; }
+        .watermark a:hover { text-decoration: underline; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
             .main-grid { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: 1fr; }
@@ -194,7 +229,7 @@
         
         @media print {
             body { background: white; }
-            .form-section, .header { display: none !important; }
+            .form-section, .header, .watermark { display: none !important; }
             .main-grid { grid-template-columns: 1fr; }
             .invoice-preview { box-shadow: none; }
             @page { margin: 0.5in; }
@@ -203,11 +238,15 @@
 </head>
 <body>
     <div class="container">
+        <div id="successMessage" class="success-message" style="display: none;">
+            🎉 Welcome to InvoiceSnap Pro! You now have unlimited access to all features.
+        </div>
+        
         <header class="header">
-            <div class="logo">📄 InvoiceSnap</div>
+            <div class="logo" id="logoText">📄 InvoiceSnap</div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="buyNow()" id="buyBtn">💳 Get Pro - $9</button> 
-                <button class="btn btn-primary" onclick="downloadPDF()" id="downloadBtn" style="display: none;">💾 Download PDF</button>
+                <button class="btn btn-primary" onclick="buyNow()" id="buyBtn">💳 Get Pro Version - $9</button>
+                <button class="btn btn-success" onclick="downloadPDF()" id="downloadBtn" style="display: none;">💾 Download PDF</button>
                 <button class="btn btn-secondary" onclick="resetForm()">🔄 New Invoice</button>
             </div>
         </header>
@@ -362,10 +401,13 @@
                     <div class="notes-section">
                         <div class="notes-title">Notes:</div>
                         <div class="notes-content" id="previewNotes">Thank you for your business!</div>
-                        <div id="freeWatermark" style="margin-top: 20px; padding: 16px; background: #fef3c7; border: 2px dashed #f59e0b; border-radius: 8px; text-align: center; color: #92400e;">
-    <strong>🚀 Created with InvoiceSnap</strong><br>
-    <small>Remove watermark with Pro - <a href="#" onclick="buyNow()" style="color: #1d4ed8;">Upgrade $9</a></small>
-</div>
+                        
+                        <div id="freeWatermark" class="watermark">
+                            <strong>🚀 Created with InvoiceSnap Free</strong>
+                            <div style="margin-top: 8px;">
+                                <a href="#" onclick="buyNow()">Upgrade to Pro for $9</a> to remove this watermark and unlock PDF downloads!
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -374,6 +416,7 @@
     
     <script>
         let itemCount = 0;
+        let isProUser = false;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -381,6 +424,7 @@
             setDefaultDates();
             addItem();
             setupEventListeners();
+            checkPurchaseStatus();
             updatePreview();
         });
         
@@ -494,6 +538,12 @@
         }
         
         function downloadPDF() {
+            if (!isProUser) {
+                if (confirm('PDF download requires InvoiceSnap Pro ($9). Upgrade now to unlock unlimited downloads?')) {
+                    buyNow();
+                }
+                return;
+            }
             window.print();
         }
         
@@ -519,24 +569,35 @@
             }
         }
     </script>
+    
+    <!-- Stripe Integration -->
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         const stripe = Stripe('pk_test_51S3RE74Iu9msxaEGRGAU6jiQmqX4PmRLhzDo9brQfKXitYNFYyVatbS8STESORLqAAwUIGCnEr3xuK53d2vgliEP00s52lDs8F');
         
         function checkPurchaseStatus() {
+            // Check URL for success parameter
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('success') === 'true') {
                 unlockPro();
-                alert('🎉 Payment successful! You now have full access!');
+                showSuccessMessage();
+                // Clean URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             
+            // Check localStorage for previous purchase
             if (localStorage.getItem('invoicesnap_pro') === 'true') {
                 unlockPro();
             }
         }
         
         function buyNow() {
+            // Add loading state
+            const buyBtn = document.getElementById('buyBtn');
+            const originalText = buyBtn.innerHTML;
+            buyBtn.innerHTML = '⏳ Processing...';
+            buyBtn.disabled = true;
+            
             stripe.redirectToCheckout({
                 lineItems: [{
                     price: 'price_1S3RMh4Iu9msxaEGqfMFjHFa',
@@ -545,18 +606,43 @@
                 mode: 'payment',
                 successUrl: window.location.href + '?success=true',
                 cancelUrl: window.location.href,
+                customerEmail: document.getElementById('businessEmail').value || undefined,
+            }).then(function (result) {
+                // Reset button if there's an error
+                buyBtn.innerHTML = originalText;
+                buyBtn.disabled = false;
+                
+                if (result.error) {
+                    alert('Payment Error: ' + result.error.message);
+                }
             });
         }
         
         function unlockPro() {
+            isProUser = true;
             localStorage.setItem('invoicesnap_pro', 'true');
+            
+            // Update UI
             document.getElementById('buyBtn').style.display = 'none';
             document.getElementById('downloadBtn').style.display = 'inline-flex';
             document.getElementById('freeWatermark').style.display = 'none';
+            
+            // Add pro badge
+            const logo = document.getElementById('logoText');
+            if (!logo.innerHTML.includes('PRO')) {
+                logo.innerHTML = '📄 InvoiceSnap <span class="pro-badge">PRO</span>';
+            }
         }
         
-        // Call on page load
-        document.addEventListener('DOMContentLoaded', checkPurchaseStatus);
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 5000);
+        }
     </script>
 </body>
 </html>
