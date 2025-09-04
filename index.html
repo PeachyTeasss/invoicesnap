@@ -514,5 +514,44 @@
             }
         }
     </script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+        
+        function checkPurchaseStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                unlockPro();
+                alert('🎉 Payment successful! You now have full access!');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            if (localStorage.getItem('invoicesnap_pro') === 'true') {
+                unlockPro();
+            }
+        }
+        
+        function buyNow() {
+            stripe.redirectToCheckout({
+                lineItems: [{
+                    price: 'price_YOUR_PRICE_ID_HERE',
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                successUrl: window.location.href + '?success=true',
+                cancelUrl: window.location.href,
+            });
+        }
+        
+        function unlockPro() {
+            localStorage.setItem('invoicesnap_pro', 'true');
+            document.getElementById('buyBtn').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'inline-flex';
+            document.getElementById('freeWatermark').style.display = 'none';
+        }
+        
+        // Call on page load
+        document.addEventListener('DOMContentLoaded', checkPurchaseStatus);
+    </script>
 </body>
 </html>
