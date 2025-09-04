@@ -50,8 +50,101 @@
         .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .paywall {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 40px auto;
+        }
         
+        .paywall h1 {
+            font-size: 32px;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .paywall p {
+            font-size: 18px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 32px 0;
+            background: #f9fafb;
+            padding: 32px;
+            border-radius: 12px;
+        }
+        
+        .features h3 {
+            color: #1f2937;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #374151;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .feature-list li:before {
+            content: "✅";
+            font-size: 18px;
+        }
+        
+        .price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4f46e5;
+            margin: 24px 0;
+        }
+        
+        .price-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .buy-button {
+            font-size: 20px;
+            padding: 16px 32px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .buy-button:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 56, 202, 0.3);
+        }
+        
+        .guarantee {
+            margin-top: 24px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .form-section { display: flex; flex-direction: column; gap: 20px; }
         
         .card {
@@ -188,26 +281,6 @@
         .notes-title { font-weight: 600; color: #1f2937; margin-bottom: 8px; }
         .notes-content { color: #6b7280; white-space: pre-line; }
         
-        .watermark {
-            margin-top: 24px;
-            padding: 20px;
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 2px dashed #f59e0b;
-            border-radius: 12px;
-            text-align: center;
-            color: #92400e;
-            animation: pulse 2s infinite;
-        }
-        
-        .watermark strong { font-size: 16px; display: block; margin-bottom: 8px; }
-        .watermark a { color: #1d4ed8; text-decoration: none; font-weight: 600; }
-        .watermark a:hover { text-decoration: underline; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
         .success-message {
             background: #d1fae5;
             border: 1px solid #10b981;
@@ -219,17 +292,22 @@
             font-weight: 600;
         }
         
+        .hidden { display: none; }
+        
         @media (max-width: 768px) {
             .main-grid { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: 1fr; }
             .invoice-parties { grid-template-columns: 1fr; }
             .item-row { grid-template-columns: 1fr; gap: 8px; }
             .header { flex-direction: column; gap: 16px; }
+            .paywall { padding: 40px 24px; margin: 20px auto; }
+            .paywall h1 { font-size: 24px; }
+            .price { font-size: 36px; }
         }
         
         @media print {
             body { background: white; }
-            .form-section, .header, .watermark { display: none !important; }
+            .form-section, .header { display: none !important; }
             .main-grid { grid-template-columns: 1fr; }
             .invoice-preview { box-shadow: none; }
             @page { margin: 0.5in; }
@@ -238,20 +316,50 @@
 </head>
 <body>
     <div class="container">
-        <div id="successMessage" class="success-message" style="display: none;">
-            🎉 Welcome to InvoiceSnap Pro! You now have unlimited access to all features.
+        <div id="successMessage" class="success-message hidden">
+            🎉 Welcome to InvoiceSnap! Payment successful - you now have lifetime access.
         </div>
         
         <header class="header">
             <div class="logo" id="logoText">📄 InvoiceSnap</div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="buyNow()" id="buyBtn">💳 Get Pro Version - $9</button>
-                <button class="btn btn-success" onclick="downloadPDF()" id="downloadBtn" style="display: none;">💾 Download PDF</button>
+                <button class="btn btn-success" onclick="downloadPDF()" id="downloadBtn">💾 Download PDF</button>
                 <button class="btn btn-secondary" onclick="resetForm()">🔄 New Invoice</button>
             </div>
         </header>
         
-        <div class="main-grid">
+        <!-- Paywall for unpaid users -->
+        <div id="paywall" class="paywall">
+            <h1>Professional Invoice Generator</h1>
+            <p>Create beautiful, professional invoices in seconds. Perfect for freelancers, consultants, and small businesses.</p>
+            
+            <div class="features">
+                <h3>What's Included:</h3>
+                <ul class="feature-list">
+                    <li>Unlimited professional invoices</li>
+                    <li>Automatic tax and discount calculations</li>
+                    <li>Professional PDF downloads</li>
+                    <li>Mobile-friendly design</li>
+                    <li>Custom business branding</li>
+                    <li>Lifetime access - no subscriptions</li>
+                </ul>
+            </div>
+            
+            <div class="price">$9</div>
+            <div class="price-subtitle">One-time payment • Lifetime access</div>
+            
+            <button class="buy-button" onclick="buyNow()" id="buyBtn">
+                💳 Get Instant Access
+            </button>
+            
+            <div class="guarantee">
+                Secure payment processing by Stripe<br>
+                Start creating invoices immediately after purchase
+            </div>
+        </div>
+        
+        <!-- Main app (hidden until payment) -->
+        <div class="main-grid hidden" id="mainApp">
             <div class="form-section">
                 <!-- Business Info -->
                 <div class="card">
@@ -401,13 +509,6 @@
                     <div class="notes-section">
                         <div class="notes-title">Notes:</div>
                         <div class="notes-content" id="previewNotes">Thank you for your business!</div>
-                        
-                        <div id="freeWatermark" class="watermark">
-                            <strong>🚀 Created with InvoiceSnap Free</strong>
-                            <div style="margin-top: 8px;">
-                                <a href="#" onclick="buyNow()">Upgrade to Pro for $9</a> to remove this watermark and unlock PDF downloads!
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -416,17 +517,54 @@
     
     <script>
         let itemCount = 0;
-        let isProUser = false;
+        let isPaid = false;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            checkPaymentStatus();
+        });
+        
+        function checkPaymentStatus() {
+            // Check URL for success parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                unlockApp();
+                showSuccessMessage();
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Check localStorage for previous purchase
+            if (localStorage.getItem('invoicesnap_paid') === 'true') {
+                unlockApp();
+            }
+        }
+        
+        function unlockApp() {
+            isPaid = true;
+            localStorage.setItem('invoicesnap_paid', 'true');
+            
+            // Hide paywall, show app
+            document.getElementById('paywall').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            // Initialize the app
             generateInvoiceNumber();
             setDefaultDates();
             addItem();
             setupEventListeners();
-            checkPurchaseStatus();
             updatePreview();
-        });
+        }
+        
+        function showSuccessMessage() {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successMsg.classList.add('hidden');
+            }, 5000);
+        }
         
         function generateInvoiceNumber() {
             const num = 'INV-' + Date.now().toString().slice(-6);
@@ -468,6 +606,8 @@
         }
         
         function updatePreview() {
+            if (!isPaid) return;
+            
             // Update basic info
             document.getElementById('previewNumber').textContent = '#' + (document.getElementById('invoiceNumber').value || 'INV-001');
             document.getElementById('previewDate').textContent = 'Date: ' + (document.getElementById('invoiceDate').value || '2024-01-01');
@@ -492,6 +632,8 @@
         }
         
         function updateItems() {
+            if (!isPaid) return;
+            
             const itemRows = document.querySelectorAll('.item-row');
             const tbody = document.getElementById('previewItemsBody');
             tbody.innerHTML = '';
@@ -538,16 +680,16 @@
         }
         
         function downloadPDF() {
-            if (!isProUser) {
-                if (confirm('PDF download requires InvoiceSnap Pro ($9). Upgrade now to unlock unlimited downloads?')) {
-                    buyNow();
-                }
+            if (!isPaid) {
+                alert('Please purchase access first!');
                 return;
             }
             window.print();
         }
         
         function resetForm() {
+            if (!isPaid) return;
+            
             if (confirm('Are you sure you want to reset all fields?')) {
                 document.querySelectorAll('input, textarea').forEach(input => {
                     if (input.type === 'date') return;
@@ -573,23 +715,7 @@
     <!-- Stripe Integration -->
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        const stripe = Stripe('pk_test_51S3RE74Iu9msxaEGRGAU6jiQmqX4PmRLhzDo9brQfKXitYNFYyVatbS8STESORLqAAwUIGCnEr3xuK53d2vgliEP00s52lDs8F');
-        
-        function checkPurchaseStatus() {
-            // Check URL for success parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success') === 'true') {
-                unlockPro();
-                showSuccessMessage();
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            
-            // Check localStorage for previous purchase
-            if (localStorage.getItem('invoicesnap_pro') === 'true') {
-                unlockPro();
-            }
-        }
+        const stripe = Stripe('pk_live_51S3RDq3mmnc6CD78qPlPPHMD70trYYNQPUnx5L19nL5jPQPczOWlLlYWSxFeUfpQc4FPbtXweqXbeFdVNYG4J2iG00YD8S2zoj');
         
         function buyNow() {
             // Add loading state
@@ -600,13 +726,12 @@
             
             stripe.redirectToCheckout({
                 lineItems: [{
-                    price: 'price_1S3RMh4Iu9msxaEGqfMFjHFa',
+                    price: 'price_1S3S6T3mmnc6CD78TawkHfek',
                     quantity: 1,
                 }],
                 mode: 'payment',
                 successUrl: window.location.href + '?success=true',
                 cancelUrl: window.location.href,
-                customerEmail: document.getElementById('businessEmail').value || undefined,
             }).then(function (result) {
                 // Reset button if there's an error
                 buyBtn.innerHTML = originalText;
@@ -616,32 +741,6 @@
                     alert('Payment Error: ' + result.error.message);
                 }
             });
-        }
-        
-        function unlockPro() {
-            isProUser = true;
-            localStorage.setItem('invoicesnap_pro', 'true');
-            
-            // Update UI
-            document.getElementById('buyBtn').style.display = 'none';
-            document.getElementById('downloadBtn').style.display = 'inline-flex';
-            document.getElementById('freeWatermark').style.display = 'none';
-            
-            // Add pro badge
-            const logo = document.getElementById('logoText');
-            if (!logo.innerHTML.includes('PRO')) {
-                logo.innerHTML = '📄 InvoiceSnap <span class="pro-badge">PRO</span>';
-            }
-        }
-        
-        function showSuccessMessage() {
-            const successMsg = document.getElementById('successMessage');
-            successMsg.style.display = 'block';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                successMsg.style.display = 'none';
-            }, 5000);
         }
     </script>
 </body>
